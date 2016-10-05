@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="nameList">
+<head>
+    <meta charset="UTF-8">
+    <title>报名表</title>
+    <script src="libs/jquery.js"></script>
+    <script src="libs/angular.js"></script>
+    <link rel="stylesheet" href="libs/bootstrap.css">
+    <link rel="stylesheet" href="libs/bootstrap-theme.css">
+    <style>
+        li {
+            float: left;
+        }
+
+        body {
+            padding-top: 50px;
+        }
+    </style>
+</head>
+<body ng-controller="mainController">
+
+<div class="container">
+    <div class="row">
+        <h1>讲座报名表</h1>
+    </div>
+    <div class="row" style="padding-top: 30px;">
+        <div class="col-xs-3">
+            <div class="input-group">
+                  <span class="input-group-addon">
+                      姓名
+                  </span>
+                <input type="text" ng-model="addViewData.name" class="form-control" placeholder="输入姓名">
+            </div>
+        </div>
+        <div class="col-xs-8">
+            <div class="input-group">
+                  <span class="input-group-addon">
+                      电话
+                  </span>
+                <input type="text" ng-model="addViewData.phone" class="form-control" placeholder="输入电话">
+            </div>
+        </div>
+        <div class="col-xs-1">
+            <button ng-click="action.add()" class="btn btn-success">添加</button>
+        </div>
+    </div>
+
+    <div class="row" style="padding-top: 30px;">
+        <a class="btn btn-success btn-ms " ng-class="{active:getPath() == '/全部'}" href="#/全部">显示全部</a>
+        <a class="btn btn-success btn-ms " ng-class="{active:getPath() == '/已报名'}" href="#/已报名">显示已报名</a>
+        <a class="btn btn-success btn-ms " ng-class="{active:getPath() == '/已付款'}" href="#/已付款">显示已付款</a>
+        <a class="btn btn-success btn-ms " ng-class="{active:getPath() == '/未付款'}" href="#/未付款">显示未付款</a>
+    </div>
+
+    <div class="row" style="padding-top: 30px;">
+        <table class="table table-bordered">
+            <tr>
+                <th style="width: 50px">id</th>
+                <th style="width: 100px">姓名</th>
+                <th style="width: 150px">电话</th>
+                <th style="width: 100px">状态</th>
+                <th>操作</th>
+
+            </tr>
+            <tr ng-repeat="item in data.getNameList() | filter:filterViewData">
+                <td>{{item.id}}</td>
+                <td>{{item.name}}</td>
+                <td>{{item.phone}}</td>
+                <td>{{item.state}}</td>
+                <td>
+                    <button ng-if="item.state == '已报名'" ng-click="action.paid(item)" class="btn btn-xs btn-success">
+                        已付款
+                    </button>
+                    <button ng-if="item.state == '已报名'" ng-click="item.refuse()" class="btn btn-xs btn-danger">未付款
+                    </button>
+                    <button ng-click="action.remove(item)" class="btn btn-xs btn-default">删除</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script src="libs/bootstrap.js"></script>
+<script src="module/modelService.js"></script>
+
+<script>
+
+    var nameListApp = angular.module('nameList', ['ic.model']);
+    nameListApp.controller('mainController', ['$scope', '$location', 'icModel', function ($scope, $location, icModelService) {
+        var data = $scope.data = icModelService;
+        var action = $scope.action = {};
+        action.paid = function (item) {
+            item.paid();
+        };
+        action.remove = function (item) {
+            icModelService.remove(item);
+        };
+
+        var addViewData = $scope.addViewData = {name: "", phone: ""};
+        action.add = function () {
+            icModelService.add(addViewData.name, addViewData.phone);
+            addViewData.name = "";
+            addViewData.phone = "";
+
+        };
+
+        var filterViewData = $scope.filterViewData = {
+
+        };
+        $scope.getPath = function () {
+            return $location.path()
+        };
+        $scope.$watch('getPath()', function (nv, pv, scope) {
+            switch (nv){
+                case '/全部': filterViewData.state = ''; break;
+                case '/已报名':filterViewData.state = '已报名';break;
+                case '/已付款':filterViewData.state = '已付款';break;
+                case '/未付款':filterViewData.state = '未付款';break;
+            }
+        })
+
+    }])
+
+</script>
+</body>
+</html>
